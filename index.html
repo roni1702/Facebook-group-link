@@ -463,21 +463,31 @@
     }
 
 // Add Balance লজিক (নতুন আপডেট করা)
+// Add Balance লজিক (TrxID সাবমিট)
     async function submitTrxId() {
-        const trxId = document.getElementById('trxIdInput').value;
-        if(!trxId) return showToast("দয়া করে Transaction ID দিন!");
+        const trxIdInput = document.getElementById('trxIdInput');
+        const trxId = trxIdInput.value;
         
-        const btn = event.target; // সেন্ড বাটনটি ধরা
+        if(!trxId) {
+            showToast("দয়া করে Transaction ID দিন!");
+            return;
+        }
+        
+        // বাটনটি নিরাপদে সিলেক্ট করা
+        const btn = trxIdInput.nextElementSibling; 
         const originalText = btn.innerText;
         btn.innerText = "Sending...";
         btn.disabled = true;
 
-        // আপনার দেওয়া গুগল ফর্মের লিংক (viewform এর জায়গায় formResponse)
+        // আপনার দেওয়া গুগল ফর্মের লিংক
         const TRX_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScsl76XOAUMGJGjqrcPNVD2XOG0emI5jt3ljG_MRCxqSuJAdw/formResponse";
         
         const formData = new FormData();
-        // ইউজারের নম্বর এবং ট্রানজাকশন আইডি একসাথে পাঠানো হচ্ছে
-        const finalData = `Phone: ${userPhone} - TrxID: ${trxId}`;
+        
+        // যদি টেস্টিং এর সময় লগইন করা না থাকে, তবে Unknown দেখাবে যেন কোড ক্র্যাশ না করে
+        const phoneToSave = userPhone ? userPhone : "Unknown"; 
+        const finalData = `Phone: ${phoneToSave} - TrxID: ${trxId}`;
+        
         formData.append("entry.690629767", finalData);
 
         try {
@@ -490,17 +500,20 @@
 
             // ডেটা পাঠানো সফল হলে এলার্ট দেখাবে
             showModal("আপনার ট্রানজাকশন আইডি জমা নেয়া হয়েছে। ১২ ঘন্টা থেকে ২৪ ঘন্টার মধ্যে এটা যাচাই করে আপনার একাউন্টে টাকা জমা হয়ে যাবে ইনশা আল্লাহ", () => {
-                document.getElementById('trxIdInput').value = '';
-                switchContent('groupLinkContent', document.getElementById('tabGroupLink'));
+                trxIdInput.value = ''; // ইনপুট বক্স ফাঁকা করা
+                switchContent('groupLinkContent', document.getElementById('tabGroupLink')); // গ্রুপ লিংকে ফেরত পাঠানো
             }, "OK");
 
         } catch (error) {
             showToast("সমস্যা হয়েছে, আবার চেষ্টা করুন!");
         } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
+            // বাটন আগের অবস্থায় ফিরিয়ে আনা
+            if(btn) {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
+        }
+    }
     // ================= ফেসবুক গ্রুপ লজিক =================
     
     async function loadFacebookGroups() {
