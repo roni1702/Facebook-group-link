@@ -462,16 +462,45 @@
         showToast("নম্বর কপি করা হয়েছে!");
     }
 
-    function submitTrxId() {
+    // Add Balance লজিক (নতুন আপডেট করা)
+    async function submitTrxId() {
         const trxId = document.getElementById('trxIdInput').value;
         if(!trxId) return showToast("দয়া করে Transaction ID দিন!");
         
-        showModal("আপনার ট্রানজাকশন আইডি জমা নেয়া হয়েছে। ১২ ঘন্টা থেকে ২৪ ঘন্টার মধ্যে এটা যাচাই করে আপনার একাউন্টে টাকা জমা হয়ে যাবে ইনশা আল্লাহ", () => {
-            document.getElementById('trxIdInput').value = '';
-            switchContent('groupLinkContent', document.getElementById('tabGroupLink'));
-        }, "OK");
-    }
+        const btn = event.target; // সেন্ড বাটনটি ধরা
+        const originalText = btn.innerText;
+        btn.innerText = "Sending...";
+        btn.disabled = true;
 
+        // আপনার দেওয়া গুগল ফর্মের লিংক (viewform এর জায়গায় formResponse)
+        const TRX_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScsl76XOAUMGJGjqrcPNVD2XOG0emI5jt3ljG_MRCxqSuJAdw/formResponse";
+        
+        const formData = new FormData();
+        // ইউজারের নম্বর এবং ট্রানজাকশন আইডি একসাথে পাঠানো হচ্ছে
+        const finalData = `Phone: ${userPhone} - TrxID: ${trxId}`;
+        formData.append("entry.690629767", finalData);
+
+        try {
+            // ব্যাকগ্রাউন্ডে ডেটা পাঠানো
+            await fetch(TRX_FORM_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: formData
+            });
+
+            // ডেটা পাঠানো সফল হলে এলার্ট দেখাবে
+            showModal("আপনার ট্রানজাকশন আইডি জমা নেয়া হয়েছে। ১২ ঘন্টা থেকে ২৪ ঘন্টার মধ্যে এটা যাচাই করে আপনার একাউন্টে টাকা জমা হয়ে যাবে ইনশা আল্লাহ", () => {
+                document.getElementById('trxIdInput').value = '';
+                switchContent('groupLinkContent', document.getElementById('tabGroupLink'));
+            }, "OK");
+
+        } catch (error) {
+            showToast("সমস্যা হয়েছে, আবার চেষ্টা করুন!");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
     // ================= ফেসবুক গ্রুপ লজিক =================
     
     async function loadFacebookGroups() {
