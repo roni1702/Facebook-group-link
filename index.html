@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Facebook Groups</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- reCAPTCHA v3 Script -->
+    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_SITE_KEY"></script>
+    
+    <style>
+        /* ================= বেসিক সেটআপ ================= */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --text-main: #1f2937;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ================= অথেনটিকেশন (Login & Register) ================= */
+        #authSection { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 20px; }
+        .auth-container { background: #ffffff; width: 100%; max-width: 400px; padding: 35px 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); display: none; animation: fadeIn 0.4s; }
+        .auth-container.active { display: block; }
+        .auth-container h2 { text-align: center; color: var(--text-main); margin-bottom: 25px; font-weight: 600; font-size: 22px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 6px; font-size: 13px; color: #4b5563; font-weight: 500; }
+        .input-group input { width: 100%; padding: 10px 15px; border: 2px solid #e5e7eb; border-radius: 8px; outline: none; font-size: 14px; background: #f9fafb; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); background: #ffffff; }
+        
+        .submit-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .submit-btn:hover { background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%); }
+        .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        
+        .switch-link { text-align: center; margin-top: 15px; font-size: 13px; color: var(--text-muted); }
+        .switch-link span { color: var(--primary); font-weight: 600; cursor: pointer; }
+
+        /* ================= মূল ওয়েবসাইট (Dashboard) ================= */
+        #mainAppSection { display: none; flex-direction: column; min-height: 100vh; animation: fadeIn 0.4s; }
+        
+        /* অ্যাপ বার */
+        .app-bar { background: var(--primary); color: white; text-align: center; padding: 15px; font-size: 18px; font-weight: 600; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .main-container { flex: 1; width: 100%; max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* ৪টি বক্সের গ্রিড (সবসময় ওপরে থাকবে) */
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .dashboard-card { padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: center; min-height: 90px; }
+        .dashboard-card:active { transform: scale(0.97); }
+        
+        /* ওপরের ২টা বক্স (রঙিন) */
+        .top-box { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; box-shadow: 0 4px 10px rgba(79,70,229,0.2); }
+        .top-box.balance { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 10px rgba(16,185,129,0.2); cursor: default; }
+        .top-box h3 { font-size: 13px; font-weight: 500; opacity: 0.9; margin-bottom: 5px; }
+        .top-box .value { font-size: 18px; font-weight: 700; }
+
+        /* নিচের ২টা বক্স (সাদা) */
+        .bottom-box { background: white; border: 1.5px solid #e2e8f0; color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .bottom-box.active-tab { border-color: var(--primary); background: #eff6ff; }
+        .bottom-box h3 { font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 3px; }
+        .bottom-box p { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+        /* ================= কন্টেন্ট এরিয়া (বক্সের নিচে পরিবর্তন হবে) ================= */
+        .content-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Add Balance কন্টেন্ট */
+        .add-balance-content { background: white; padding: 20px; border-radius: 12px; font-size: 13px; line-height: 1.6; border: 1px solid #e2e8f0; }
+        .add-balance-content ul { padding-left: 20px; margin: 10px 0; }
+        .highlight-text { color: #d97706; font-style: italic; font-weight: 500; margin: 15px 0; padding: 12px; background: #fef3c7; border-left: 3px solid #d97706; border-radius: 6px; }
+        .step-title { font-size: 15px; font-weight: 600; color: var(--primary); margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+        .copy-box { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1.5px dashed var(--primary); padding: 10px 15px; border-radius: 8px; font-size: 16px; font-weight: 600; margin: 10px 0; }
+        .copy-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .trx-group { display: flex; gap: 8px; margin-top: 10px; }
+        .trx-group input { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13px; }
+        .trx-group button { background: var(--success); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
+
+        /* Group List & Joined List কন্টেন্ট */
+        .list-item { background: white; padding: 12px 15px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .list-info h4 { font-size: 14px; color: var(--text-main); }
+        .list-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .action-btn { background: var(--primary); color: white; border: none; padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none; }
+        .action-btn.open { background: var(--success); }
+        
+        .joined-header { display: flex; justify-content: space-between; background: #e0e7ff; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; font-weight: 600; color: var(--primary); }
+
+        /* ফুটার */
+        footer { text-align: center; padding: 15px; font-size: 12px; color: var(--text-muted); background: white; border-top: 1px solid #e2e8f0; margin-top: auto; }
+        footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+        /* ================= মডাল, টোস্ট ও লোডার ================= */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-box { background: white; width: 85%; max-width: 350px; padding: 20px; border-radius: 12px; text-align: center; transform: translateY(-20px); transition: 0.3s; }
+        .modal-overlay.show .modal-box { transform: translateY(0); }
+        .modal-text { font-size: 14px; color: var(--text-main); margin-bottom: 15px; line-height: 1.5; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
+        .btn-confirm { background: var(--primary); color: white; }
+        
+        .toast { position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background: #334155; color: white; padding: 10px 20px; border-radius: 20px; font-size: 12px; z-index: 3000; transition: 0.3s; white-space: nowrap; }
+        .toast.show { bottom: 20px; }
+
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1000; }
+        .loader-spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        .loader-text { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--primary); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- ================= ১. অথেনটিকেশন সেকশন (লগইন/রেজিস্টার) ================= -->
+    <div id="authSection">
+        
+        <!-- লগইন ফর্ম -->
+        <div class="auth-container active" id="loginBox">
+            <h2>Log in</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>মোবাইল নম্বর</label>
+                    <input type="number" id="loginPhone" placeholder="01XXXXXXXXX" required>
+                </div>
+                <div class="input-group">
+                    <label>পাসওয়ার্ড</label>
+                    <input type="password" id="loginPassword" placeholder="আপনার পাসওয়ার্ড দিন" required>
+                </div>
+                <button type="submit" id="loginBtn" class="submit-btn">Log in</button>
+            </form>
+            <div class="switch-link">
+                Don't have an account? <span onclick="switchAuth('registerBox')">Create Account</span>
+            </div>
+        </div>
+
+        <!-- রেজিস্ট্রেশন ফর্ম -->
+        <div class="auth-container" id="registerBox">
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <div class="input-group">
+                    <label>আপনার নাম</label>
+                    <input type="text" id="regName" placeholder="আপনার সম্পূর্ণ নাম" required>
+                </div>
+                <div class="input-group">
+                    <label>মোবাইল নম্বর</label>
+                    <input type="number" id="regPhone" placeholder="01XXXXXXXXX" required>
+                </div>
+                <div class="input-group">
+                    <label>ফেসবুক আইডি লিংক</label>
+                    <input type="url" id="regFbLink" placeholder="https://facebook.com/..." required>
+                </div>
+                <div class="input-group">
+                    <label>ট্রেইনারের নাম</label>
+                    <input type="text" id="regTrainer" placeholder="আপনার ট্রেইনারের নাম" required>
+                </div>
+                <div class="input-group">
+                    <label>পাসওয়ার্ড</label>
+                    <input type="password" id="regPassword" placeholder="একটি শক্ত পাসওয়ার্ড দিন" required>
+                </div>
+                <button type="submit" id="regBtn" class="submit-btn">Create Account</button>
+            </form>
+            <div class="switch-link">
+                Already have an account? <span onclick="switchAuth('loginBox')">Log in</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= ২. মূল ওয়েবসাইট সেকশন (Dashboard) ================= -->
+    <div id="mainAppSection">
+        
+        <!-- অ্যাপ বার -->
+        <div class="app-bar">Facebook Group Link</div>
+
+        <div class="main-container">
+            
+            <!-- ৪টি বক্স (সবসময় ওপরে থাকবে) -->
+            <div class="grid-container">
+                <div class="dashboard-card top-box" onclick="switchContent('addBalanceContent', this)">
+                    <h3>Add Balance</h3>
+                    <div class="value">+</div>
+                </div>
+                <div class="dashboard-card top-box balance">
+                    <h3>Balance</h3>
+                    <div class="value">৳ <span id="displayBalance">0.00</span></div>
+                </div>
+                <!-- ডিফল্টভাবে এই বক্সটি একটিভ থাকবে -->
+                <div class="dashboard-card bottom-box active-tab" id="tabGroupLink" onclick="switchContent('groupLinkContent', this)">
+                    <h3>Facebook Group</h3>
+                    <p>নতুন লিংক পান</p>
+                </div>
+                <div class="dashboard-card bottom-box" onclick="switchContent('joinedContent', this)">
+                    <h3>You Joined</h3>
+                    <p><span id="joinedCountLabel">0</span> Groups</p>
+                </div>
+            </div>
+
+            <!-- কন্টেন্ট এরিয়া (বক্সের নিচে পরিবর্তন হবে) -->
+            
+            <!-- কন্টেন্ট ১: Facebook Group Link (ডিফল্ট) -->
+            <div id="groupLinkContent" class="content-section active">
+                <div id="groupListContainer">
+                    <!-- JS দিয়ে গ্রুপ লিস্ট এখানে আসবে -->
+                </div>
+            </div>
+
+            <!-- কন্টেন্ট ২: Add Balance -->
+            <div id="addBalanceContent" class="content-section">
+                <div class="add-balance-content">
+                    <p>আপনাদের মার্কেটিং করার সুবিধার জন্য আমি এমন ফেসবুক গ্রুপ লিংক দিচ্ছি যেখানে পোস্ট এপ্রুভাল নেই। এসব গ্রুপে আপনাদের সুবিধা হলো:</p>
+                    <ul>
+                        <li>যত ইচ্ছা পোস্ট করতে পারবেন</li>
+                        <li>যখন ইচ্ছা পোস্ট করতে পারবেন</li>
+                        <li>অনেক গ্রুপ আছে যেগুলো পোস্ট এপ্রুভাল বন্ধ থাকলেও অনেক রিচ হয় পোস্ট করলে</li>
+                    </ul>
+                    <p>পোস্ট এপ্রুভাল বন্ধ থাকলেই যে আপনাদের সাথে গ্রুপটা শেয়ার করি এমনটা না। গ্রুপটা কতটা সময় আগে খোলা এবং কতটা একটিভ এটা দেখে তারপর আপনাদের দেয়া হয়। অধিকাংশ গ্রুপ মেয়েদের টার্গেট করে নেয়া হয়।</p>
+                    <div class="highlight-text">
+                        কেউ কেউ আমার কাজে দ্বিমত পোষণ করতে পারেন। ফেসবুক গ্রুপ তো ফ্রিতেই পাওয়া যায় তাহলে আমি কেন এর জন্য টাকা নিচ্ছি। তো তাদের উদ্দেশ্যে বলি, ফেসবুক গ্রুপ ফ্রিতে পাওয়া গেলেও আপনাদের সাথে আমি যে গ্রুপ গুলো শেয়ার করি সেগুলো খুজতে সময় লাগে বেশ অনেকটা। আর একেবারে ফ্রিতে দিলে সেটা আপনাদের কাছে মূল্যহীন বা তুচ্ছ মনে হতে পারে। আর আপনাদের কাউকে টাকা খরচ করে গ্রুপ নেয়ার জন্য বাধ্য করা হচ্ছে না।
+                    </div>
+                    <div class="step-title">ধাপ ১</div>
+                    <p style="margin-top: 5px;">আপনার বিকাশ / নগদ নম্বর থেকে নিচের নম্বরে সর্বনিম্ন <strong>৫০ টাকা</strong> send money করতে হবে। তবে কেউ মোবাইল রিচার্জ দিবেন না আবার।</p>
+                    <div class="copy-box">
+                        <span id="bkashNumber">01797995219</span>
+                        <button class="copy-btn" onclick="copyNumber()">Copy</button>
+                    </div>
+                    <div class="step-title">ধাপ ২</div>
+                    <p style="margin-top: 5px;">send money করার পর যে ট্রানজাকশন আইডি পাবেন ওটা নিচে দিন।</p>
+                    <div class="trx-group">
+                        <input type="text" id="trxIdInput" placeholder="Transaction ID">
+                        <button onclick="submitTrxId()">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- কন্টেন্ট ৩: You Joined -->
+            <div id="joinedContent" class="content-section">
+                <div class="joined-header">
+                    <span>Total Joined:</span>
+                    <span id="totalJoinedCount">0</span>
+                </div>
+                <div id="joinedListContainer">
+                    <!-- JS দিয়ে জয়েন করা লিস্ট এখানে আসবে -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ফুটার -->
+        <footer>
+            Website Owner: <strong>Muhammad Roni Biswas</strong><br>
+            Contact: <a href="https://m.me/mdroni1702" target="_blank">Messenger</a><br>
+            <button onclick="logout()" style="margin-top: 10px; background: none; border: none; color: var(--danger); font-weight: 600; cursor: pointer;">Log out</button>
+        </footer>
+    </div>
+
+    <!-- ================= গ্লোবাল কম্পোনেন্ট (Loader, Toast, Modal) ================= -->
+    <div id="loader" class="loader-overlay"><div class="loader-spinner"></div><div class="loader-text" id="loaderText">Loading...</div></div>
+    <div id="toast" class="toast">Message</div>
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-text" id="modalText">Alert Message</div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" id="modalConfirmBtn">Add Balance</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript কোড ২য় অংশে দেওয়া হবে -->
+    	<script>
+    // ================= গ্লোবাল ভেরিয়েবল ও API লিংক =================
+    const RECAPTCHA_SITE_KEY = 'YOUR_SITE_KEY'; // এখানে আপনার reCAPTCHA Site Key দিবেন
+    const GAS_API_URL = 'YOUR_GAS_API_URL'; // এখানে Apps Script এর Web App URL দিবেন
+
+    const REG_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeC7rj_t32IGmsSyXs9OFJXx5SdRhR2PBtaHuO85qbztCeXRw/formResponse";
+    const JOIN_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdAAhqtfOoeg_ZKmAB8fFofy8wCI_ge-sz-dc7_Y5r6xQmKqw/formResponse";
+    
+    const BALANCE_SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8c6ekT8TtVH8N64P23WmFdz2xvpl4ORi0mYbPnvE8vTyGjFq7_cA60XOJWMwkxofyrZzXtW-cIMeX/pub?gid=0&single=true&output=csv";
+    const GROUP_SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8c6ekT8TtVH8N64P23WmFdz2xvpl4ORi0mYbPnvE8vTyGjFq7_cA60XOJWMwkxofyrZzXtW-cIMeX/pub?gid=877067214&single=true&output=csv";
+
+    let userPhone = localStorage.getItem('userPhone') || null;
+    let currentBalance = 0;
+    let fetchedGroups = [];
+    let joinedGroups = [];
+
+    // ================= ইনিশিয়ালাইজেশন (পেজ লোড হলে) =================
+    document.addEventListener('DOMContentLoaded', () => {
+        if (userPhone) {
+            // লগইন করা থাকলে সরাসরি ড্যাশবোর্ডে যাবে
+            showMainApp();
+        } else {
+            // লগইন করা না থাকলে অথেনটিকেশন পেজ দেখাবে
+            document.getElementById('authSection').style.display = 'flex';
+        }
+    });
+
+    // ================= UI কন্ট্রোল ফাংশন =================
+    function switchAuth(boxId) {
+        document.querySelectorAll('.auth-container').forEach(el => el.classList.remove('active'));
+        document.getElementById(boxId).classList.add('active');
+    }
+
+    function switchContent(contentId, tabElement) {
+        // কন্টেন্ট পরিবর্তন
+        document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(contentId).classList.add('active');
+        
+        // নিচের ২টা বক্সের একটিভ কালার পরিবর্তন
+        document.querySelectorAll('.bottom-box').forEach(el => el.classList.remove('active-tab'));
+        if(tabElement && tabElement.classList.contains('bottom-box')) {
+            tabElement.classList.add('active-tab');
+        }
+
+        // নির্দিষ্ট ট্যাবে ক্লিক করলে ডেটা রিফ্রেশ করা
+        if(contentId === 'groupLinkContent' && fetchedGroups.length === 0) loadFacebookGroups();
+        if(contentId === 'joinedContent') renderJoinedList();
+    }
+
+    function showLoader(text = "Loading...") {
+        document.getElementById('loaderText').innerText = text;
+        document.getElementById('loader').style.display = 'flex';
+    }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function showModal(msg, confirmAction = null, confirmText = "Add Balance") {
+        document.getElementById('modalText').innerText = msg;
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        confirmBtn.innerText = confirmText;
+        
+        confirmBtn.onclick = () => {
+            closeModal();
+            if(confirmAction) confirmAction();
+            else switchContent('addBalanceContent', null); // Add Balance পেজে নিয়ে যাবে
+        };
+        document.getElementById('customModal').classList.add('show');
+    }
+    function closeModal() { document.getElementById('customModal').classList.remove('show'); }
+
+    // CSV পার্সার
+    function parseCSV(csv) {
+        return csv.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+    }
+
+    // ================= অথেনটিকেশন লজিক =================
+    
+    // ১. রেজিস্ট্রেশন
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('regBtn');
+        btn.innerText = "Creating Account..."; btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("entry.1649882665", document.getElementById('regName').value);
+        formData.append("entry.1858663114", document.getElementById('regPhone').value);
+        formData.append("entry.862412208", document.getElementById('regFbLink').value);
+        formData.append("entry.1531652729", document.getElementById('regTrainer').value);
+        formData.append("entry.1112259383", document.getElementById('regPassword').value);
+
+        try {
+            await fetch(REG_FORM_URL, { method: "POST", mode: "no-cors", body: formData });
+            showToast("একাউন্ট সফলভাবে তৈরি হয়েছে! এবার লগইন করুন।");
+            document.getElementById('registerForm').reset();
+            switchAuth('loginBox');
+        } catch (error) {
+            showToast("সমস্যা হয়েছে, আবার চেষ্টা করুন!");
+        } finally {
+            btn.innerText = "Create Account"; btn.disabled = false;
+        }
+    });
+
+    // ২. লগইন
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('loginPhone').value;
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+
+        btn.innerText = "Authenticating..."; btn.disabled = true;
+
+        // reCAPTCHA v3 এক্সিকিউট
+        grecaptcha.ready(function() {
+            grecaptcha.execute(RECAPTCHA_SITE_KEY, {action: 'login'}).then(async function(token) {
+                try {
+                    const response = await fetch(GAS_API_URL, {
+                        method: "POST",
+                        body: JSON.stringify({ phone, password, token }),
+                        headers: { "Content-Type": "text/plain;charset=utf-8" }
+                    });
+                    const result = await response.json();
+
+                    if(result.success) {
+                        showToast("লগইন সফল হয়েছে!");
+                        localStorage.setItem('userPhone', phone);
+                        userPhone = phone;
+                        showMainApp();
+                    } else {
+                        showToast(result.message);
+                        btn.innerText = "Log in"; btn.disabled = false;
+                    }
+                } catch (error) {
+                    showToast("সার্ভার এরর! API লিংক চেক করুন।");
+                    btn.innerText = "Log in"; btn.disabled = false;
+                }
+            });
+        });
+    });
+
+    // ৩. লগআউট
+    function logout() {
+        localStorage.removeItem('userPhone');
+        location.reload(); // পেজ রিলোড দিলে অটোমেটিক লগইন পেজে চলে যাবে
+    }
+
+    // ================= ড্যাশবোর্ড লজিক =================
+    
+    function showMainApp() {
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('mainAppSection').style.display = 'flex';
+        
+        // ইউজারের জয়েন করা গ্রুপের লিস্ট লোকাল স্টোরেজ থেকে নেওয়া
+        joinedGroups = JSON.parse(localStorage.getItem(`joined_${userPhone}`)) || [];
+        updateJoinedCounts();
+        
+        fetchUserBalance();
+        loadFacebookGroups();
+    }
+
+    // ব্যালেন্স ফেচ করা
+    async function fetchUserBalance() {
+        try {
+            const res = await fetch(BALANCE_SHEET_CSV);
+            const data = parseCSV(await res.text());
+            
+            currentBalance = 0;
+            for(let i = 1; i < data.length; i++) {
+                if(data[i][0] === userPhone) {
+                    currentBalance = parseFloat(data[i][1]) || 0;
+                    break;
+                }
+            }
+            document.getElementById('displayBalance').innerText = currentBalance.toFixed(2);
+        } catch (error) { console.error("Balance Error"); }
+    }
+
+    // Add Balance লজিক
+    function copyNumber() {
+        navigator.clipboard.writeText("01797995219");
+        showToast("নম্বর কপি করা হয়েছে!");
+    }
+
+    function submitTrxId() {
+        const trxId = document.getElementById('trxIdInput').value;
+        if(!trxId) return showToast("দয়া করে Transaction ID দিন!");
+        
+        showModal("আপনার ট্রানজাকশন আইডি জমা নেয়া হয়েছে। ১২ ঘন্টা থেকে ২৪ ঘন্টার মধ্যে এটা যাচাই করে আপনার একাউন্টে টাকা জমা হয়ে যাবে ইনশা আল্লাহ", () => {
+            document.getElementById('trxIdInput').value = '';
+            switchContent('groupLinkContent', document.getElementById('tabGroupLink'));
+        }, "OK");
+    }
+
+    // ================= ফেসবুক গ্রুপ লজিক =================
+    
+    async function loadFacebookGroups() {
+        showLoader("গ্রুপ খোঁজা হচ্ছে...");
+        try {
+            const res = await fetch(GROUP_SHEET_CSV);
+            const data = parseCSV(await res.text());
+            
+            let availableGroups = [];
+            for(let i = 1; i < data.length; i++) {
+                let link = data[i][0];
+                let count = parseInt(data[i][1]) || 0;
+                
+                // কন্ডিশন: ৫ জনের কম এবং আগে জয়েন করেনি
+                let alreadyJoined = joinedGroups.some(g => g.link === link);
+                if(link && count < 5 && !alreadyJoined) {
+                    availableGroups.push(link);
+                }
+            }
+
+            // র‍্যান্ডম ১০টি গ্রুপ নির্বাচন
+            availableGroups = availableGroups.sort(() => 0.5 - Math.random()).slice(0, 10);
+            fetchedGroups = availableGroups;
+            
+            renderGroups();
+        } catch (error) {
+            showToast("গ্রুপ লোড করতে সমস্যা হয়েছে!");
+        } finally {
+            hideLoader();
+        }
+    }
+
+    function renderGroups() {
+        const container = document.getElementById('groupListContainer');
+        container.innerHTML = '';
+
+        if(fetchedGroups.length === 0) {
+            container.innerHTML = `<p style="text-align:center; padding: 20px; color: #64748b;">এই মুহূর্তে কোনো নতুন গ্রুপ নেই।</p>`;
+            return;
+        }
+
+        fetchedGroups.forEach((link, index) => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.innerHTML = `
+                <div class="list-info">
+                    <h4>Group ${index + 1}</h4>
+                    <p>1.5 taka/group</p>
+                </div>
+                <button class="action-btn" onclick="handleJoinGroup('${link}', this)">Join Group</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function handleJoinGroup(link, btnElement) {
+        // ব্যালেন্স চেক
+        if(currentBalance <= 0) {
+            return showModal("আপনার বর্তমান ব্যলেন্সে কোনো টাকা নেই। গ্রুপে জয়েন করার জন্য ব্যলেন্স এড করুন।");
+        }
+        if(currentBalance < 1.5) {
+            return showModal("আপনার বর্তমান ব্যলেন্সে ১.৫ টাকা এর কম আছে । গ্রুপে জয়েন করার জন্য ব্যলেন্স এড করুন।");
+        }
+
+        // ফার্স্ট টাইম এলার্ট
+        if(!localStorage.getItem('firstTimeJoinAlert')) {
+            showModal("একটা গ্রুপ লিংক সর্বোচ্চ ৫ জনকে join করতে দেয়া হয়। কে কোন গ্রুপ পাবে এটার ওপর আমার নিয়ন্ত্রণ নেই, এটা ওয়েবসাইট নিজে থেকে ঠিক করে। প্রতিটা গ্রুপে জয়েন করার পর আপনার ব্যলেন্স থেকে ১.৫ টাকা কেটে নেয়া হবে।", () => {
+                localStorage.setItem('firstTimeJoinAlert', 'true');
+                executeJoinLogic(link, btnElement);
+            }, "I Understand");
+            return;
+        }
+
+        executeJoinLogic(link, btnElement);
+    }
+
+    async function executeJoinLogic(link, btnElement) {
+        btnElement.innerText = "Joining..."; btnElement.disabled = true;
+        showLoader("Processing...");
+
+        const formData = new FormData();
+        formData.append("entry.2076763696", userPhone);
+        formData.append("entry.618274795", link);
+
+        try {
+            // গুগল ফর্মে ডেটা পাঠানো
+            await fetch(JOIN_FORM_URL, { method: "POST", mode: "no-cors", body: formData });
+
+            // ব্যালেন্স কাটা
+            currentBalance -= 1.5;
+            document.getElementById('displayBalance').innerText = currentBalance.toFixed(2);
+
+            // জয়েন লিস্টে সেভ করা
+            const now = new Date();
+            const dateTimeStr = now.toLocaleDateString('en-GB') + " - " + now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+            
+            joinedGroups.unshift({ link: link, dateTime: dateTimeStr });
+            localStorage.setItem(`joined_${userPhone}`, JSON.stringify(joinedGroups));
+            updateJoinedCounts();
+
+            // নতুন ট্যাবে লিংক ওপেন করা
+            window.open(link, '_blank');
+
+            // লিস্ট থেকে গ্রুপটা সরিয়ে দেওয়া
+            btnElement.parentElement.remove();
+            
+        } catch (error) {
+            showToast("সমস্যা হয়েছে, আবার চেষ্টা করুন!");
+            btnElement.innerText = "Join Group"; btnElement.disabled = false;
+        } finally {
+            hideLoader();
+        }
+    }
+
+    // ================= You Joined লজিক =================
+    
+    function updateJoinedCounts() {
+        document.getElementById('joinedCountLabel').innerText = joinedGroups.length;
+        document.getElementById('totalJoinedCount').innerText = joinedGroups.length;
+    }
+
+    function renderJoinedList() {
+        const container = document.getElementById('joinedListContainer');
+        container.innerHTML = '';
+
+        if(joinedGroups.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color: #64748b; padding: 20px;">আপনি এখনো কোনো গ্রুপে জয়েন করেননি।</p>`;
+            return;
+        }
+
+        joinedGroups.forEach((group, index) => {
+            let serialNo = joinedGroups.length - index;
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.style.flexDirection = 'column';
+            div.style.alignItems = 'flex-start';
+            div.innerHTML = `
+                <div style="width: 100%; display: flex; justify-content: space-between; font-size: 12px; color: #64748b; font-weight: 500;">
+                    <span>#${serialNo}</span>
+                    <span>${group.dateTime}</span>
+                </div>
+                <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <h4 style="font-size: 14px; color: #1f2937;">Facebook Group</h4>
+                    <a href="${group.link}" target="_blank" class="action-btn open">Open</a>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+</script>
+</body>
+</html>
