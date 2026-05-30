@@ -118,30 +118,11 @@
 </head>
 <body>
 
-    <!-- ================= ১. অথেনটিকেশন সেকশন (লগইন/রেজিস্টার) ================= -->
+<!-- ================= ১. অথেনটিকেশন সেকশন (লগইন/রেজিস্টার) ================= -->
     <div id="authSection">
         
-        <!-- লগইন ফর্ম -->
-        <div class="auth-container active" id="loginBox">
-            <h2>Log in</h2>
-            <form id="loginForm">
-                <div class="input-group">
-                    <label>মোবাইল নম্বর</label>
-                    <input type="number" id="loginPhone" placeholder="01XXXXXXXXX" required>
-                </div>
-                <div class="input-group">
-                    <label>পাসওয়ার্ড</label>
-                    <input type="password" id="loginPassword" placeholder="আপনার পাসওয়ার্ড দিন" required>
-                </div>
-                <button type="submit" id="loginBtn" class="submit-btn">Log in</button>
-            </form>
-            <div class="switch-link">
-                Don't have an account? <span onclick="switchAuth('registerBox')">Create Account</span>
-            </div>
-        </div>
-
-        <!-- রেজিস্ট্রেশন ফর্ম -->
-        <div class="auth-container" id="registerBox">
+        <!-- রেজিস্ট্রেশন ফর্ম (এখন এটি ডিফল্ট হিসেবে থাকবে) -->
+        <div class="auth-container active" id="registerBox">
             <h2>Create Account</h2>
             <form id="registerForm">
                 <div class="input-group">
@@ -167,11 +148,30 @@
                 <button type="submit" id="regBtn" class="submit-btn">Create Account</button>
             </form>
             <div class="switch-link">
-                Already have an account? <span onclick="switchAuth('loginBox')">Log in</span>
+                আগে থেকেই একাউন্ট আছে? <span onclick="switchAuth('loginBox')">লগ ইন করুন</span>
             </div>
         </div>
-    </div>
 
+        <!-- লগইন ফর্ম -->
+        <div class="auth-container" id="loginBox">
+            <h2>Log in</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>মোবাইল নম্বর</label>
+                    <input type="number" id="loginPhone" placeholder="01XXXXXXXXX" required>
+                </div>
+                <div class="input-group">
+                    <label>পাসওয়ার্ড</label>
+                    <input type="password" id="loginPassword" placeholder="আপনার পাসওয়ার্ড দিন" required>
+                </div>
+                <button type="submit" id="loginBtn" class="submit-btn">Log in</button>
+            </form>
+            <div class="switch-link">
+                একাউন্ট নেই? <span onclick="switchAuth('registerBox')">একাউন্ট তৈরি করুন</span>
+            </div>
+        </div>
+
+    </div>
 
     <!-- ================= ২. মূল ওয়েবসাইট সেকশন (Dashboard) ================= -->
     <div id="mainAppSection">
