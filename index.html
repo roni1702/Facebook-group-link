@@ -358,23 +358,34 @@
     // ================= অথেনটিকেশন লজিক =================
     
     // ১. রেজিস্ট্রেশন
+// ১. রেজিস্ট্রেশন (অটোমেটিক লগইন আপডেট)
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('regBtn');
         btn.innerText = "Creating Account..."; btn.disabled = true;
 
+        // ইউজারের দেওয়া মোবাইল নম্বরটি ভেরিয়েবলে সেভ করে রাখা
+        const phoneInput = document.getElementById('regPhone').value;
+
         const formData = new FormData();
         formData.append("entry.1649882665", document.getElementById('regName').value);
-        formData.append("entry.1858663114", document.getElementById('regPhone').value);
+        formData.append("entry.1858663114", phoneInput);
         formData.append("entry.862412208", document.getElementById('regFbLink').value);
         formData.append("entry.1531652729", document.getElementById('regTrainer').value);
         formData.append("entry.1112259383", document.getElementById('regPassword').value);
 
         try {
+            // ব্যাকগ্রাউন্ডে গুগল ফর্মে ডেটা পাঠানো
             await fetch(REG_FORM_URL, { method: "POST", mode: "no-cors", body: formData });
-            showToast("একাউন্ট সফলভাবে তৈরি হয়েছে! এবার লগইন করুন।");
+            
+            showToast("একাউন্ট সফলভাবে তৈরি হয়েছে!");
             document.getElementById('registerForm').reset();
-            switchAuth('loginBox');
+            
+            // অটোমেটিক লগইন করে সরাসরি মূল ওয়েবসাইটে (ড্যাশবোর্ডে) নিয়ে যাওয়া
+            localStorage.setItem('userPhone', phoneInput);
+            userPhone = phoneInput;
+            showMainApp();
+
         } catch (error) {
             showToast("সমস্যা হয়েছে, আবার চেষ্টা করুন!");
         } finally {
